@@ -3,6 +3,8 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -37,5 +39,17 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+    }
+
+    public function render($request, Throwable $e) {
+        if ($e instanceof HttpException) {
+            if ($e->getStatusCode() == Response::HTTP_NOT_FOUND) {
+                return response()->json(["error" => "Resource not found"], Response::HTTP_NOT_FOUND);
+            } elseif ($e->getStatusCode() == Response::HTTP_FORBIDDEN) {
+                return response()->json(["error" => $e->getMessage()], $e->getStatusCode());
+            }
+        }
+
+        return parent::render($request, $e);
     }
 }

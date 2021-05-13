@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,6 +15,17 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Auth::loginUsingId(1, $remember = true);
+
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+
+Route::group(["middleware" => "token"], function () {
+    Route::get("blogs", "BlogController@index");
+    Route::get("blogs/{id}", "BlogController@show");
+    Route::post('blogs', 'BlogController@store');
+    Route::put('blogs/{id}', 'BlogController@update');
+    Route::delete('blogs/{id}', 'BlogController@delete');
 });
